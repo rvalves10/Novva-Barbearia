@@ -1,0 +1,975 @@
+<!DOCTYPE html>
+<html lang="pt-BR" class="scroll-smooth">
+<head>
+    <!-- ========================================
+         INFORMAÇÕES GERAIS DO SITE
+         ======================================== -->
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Novva Barbearia | O Netflix dos Cortes de Cabelo</title>
+    
+    <!-- ========================================
+         FONTES EXTERNAS
+         ======================================== -->
+    <!-- Google Fonts: Syne (títulos) + Inter (corpo) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Syne:wght@500;700;800&display=swap" rel="stylesheet">
+    
+    <!-- ícones: Phosphor Icons -->
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+
+    <!-- ========================================
+         FRAMEWORK CSS
+         ======================================== -->
+    <!-- Tailwind CSS (CDN - arquivo único) -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        dark: '#0a0a0a', /* Preto Profundo */
+                        surface: '#141414',
+                        surfaceLight: '#1f1f1f',
+                        brand: '#64704E', /* Verde Oliva (Extraído da Logo) */
+                        brandHover: '#76855B', /* Verde Oliva Claro para hover */
+                    },
+                    fontFamily: {
+                        syne: ['Syne', 'sans-serif'],
+                        inter: ['Inter', 'sans-serif'],
+                    },
+                    animation: {
+                        'glow-pulse': 'glow-pulse 2s infinite',
+                    },
+                    keyframes: {
+                        'glow-pulse': {
+                            '0%, 100%': { boxShadow: '0 0 20px rgba(100, 112, 78, 0.3)' },
+                            '50%': { boxShadow: '0 0 40px rgba(100, 112, 78, 0.6)' },
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        /* Custom CSS para Efeitos Premium (Awwwards Style) */
+        body {
+            background-color: #0a0a0a;
+            color: #f3f4f6;
+            overflow-x: hidden;
+        }
+
+        /* Tipografia de Destaque */
+        .text-gradient {
+            background: linear-gradient(135deg, #fff 30%, #71717a 100%);
+            background-clip: text;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        
+        /* Efeito de brilho animado nos títulos (Verde Oliva) */
+        .title-shimmer {
+            background: linear-gradient(to right, #64704E 20%, #90A074 40%, #64704E 60%, #90A074 80%);
+            background-size: 200% auto;
+            color: #000;
+            background-clip: text;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            animation: shimmer 3s linear infinite;
+            display: inline-block;
+        }
+        @keyframes shimmer {
+            to { background-position: 200% center; }
+        }
+
+        /* Glassmorphism Aprimorado */
+        .glass {
+            background: rgba(255, 255, 255, 0.03);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.5);
+            transition: all 0.3s ease;
+        }
+        /* Efeito de borda brilhante ao passar o mouse nos cards */
+        .glass-hover:hover {
+            border-color: rgba(100, 112, 78, 0.4);
+            box-shadow: 0 8px 32px 0 rgba(100, 112, 78, 0.15);
+            transform: translateY(-4px);
+        }
+
+        /* Scroll Reveal Animations */
+        .reveal {
+            opacity: 0;
+            transform: translateY(40px);
+            transition: all 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        .reveal.active {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        .reveal-delay-1 { transition-delay: 0.1s; }
+        .reveal-delay-2 { transition-delay: 0.2s; }
+        .reveal-delay-3 { transition-delay: 0.3s; }
+
+        /* Botão Magnético - Correção do bug de transição */
+        .magnetic-btn {
+            transition: transform 0.2s ease-out, background-color 0.3s ease, border-color 0.3s ease, color 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        /* Ocultar scrollbar mantendo funcionalidade (para o slider) */
+        .hide-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .hide-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+
+        /* Accordion transition (Solução Definitiva e à Prova de Falhas) */
+        .accordion-content {
+            max-height: 0;
+            opacity: 0;
+            overflow: hidden;
+            visibility: hidden;
+            transition: max-height 0.5s ease-in-out, opacity 0.4s ease, visibility 0.4s;
+        }
+        /* Alterado de .active para .is-open para não conflitar com o scroll reveal */
+        .accordion-item.is-open .accordion-content {
+            max-height: 500px; /* Espaço mais que suficiente para o texto */
+            opacity: 1;
+            visibility: visible;
+        }
+        .accordion-icon {
+            transition: transform 0.3s ease;
+        }
+        .accordion-item.is-open .accordion-icon {
+            transform: rotate(45deg);
+        }
+        
+        /* Canvas de Partículas */
+        #particles-canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+            pointer-events: none;
+        }
+
+        /* Filtro de Barbeiros */
+        .barbeiro-card {
+            transition: all 0.5s ease;
+        }
+    </style>
+</head>
+<body class="font-inter antialiased selection:bg-brand selection:text-white bg-dark">
+
+    <!-- HEADER / NAVBAR -->
+    <header class="fixed top-0 w-full z-40 glass border-b-0 border-white/5 transition-all duration-300" id="navbar">
+        <div class="max-w-7xl mx-auto px-6 lg:px-12 h-20 flex items-center justify-between">
+            <!-- Logo -->
+            <a href="#" class="flex items-center transition-transform hover:scale-105">
+                <!--<img src="logo.png.png" alt="Novva Logo" ... class="h-8 w-auto">-->
+            </a>
+
+            <!-- Desktop Nav -->
+            <nav class="hidden md:flex gap-8 items-center text-sm font-medium text-gray-300">
+                <a href="#sobre" class="hover:text-white transition-colors relative group">Nossa História<span class="absolute -bottom-1 left-0 w-0 h-0.5 bg-brand transition-all group-hover:w-full"></span></a>
+                <a href="#faq" class="hover:text-white transition-colors relative group">Dúvidas<span class="absolute -bottom-1 left-0 w-0 h-0.5 bg-brand transition-all group-hover:w-full"></span></a>
+                <a href="#depoimentos" class="hover:text-white transition-colors relative group">Depoimentos<span class="absolute -bottom-1 left-0 w-0 h-0.5 bg-brand transition-all group-hover:w-full"></span></a>
+                <a href="#unidades" class="hover:text-white transition-colors relative group">Unidades<span class="absolute -bottom-1 left-0 w-0 h-0.5 bg-brand transition-all group-hover:w-full"></span></a>
+                <a href="#barbeiros" class="hover:text-white transition-colors relative group">Barbeiros<span class="absolute -bottom-1 left-0 w-0 h-0.5 bg-brand transition-all group-hover:w-full"></span></a>
+            </nav>
+
+            <!-- CTA -->
+            <a href="#assinar" class="magnetic-btn hidden md:inline-flex items-center justify-center bg-brand hover:bg-brandHover text-white px-6 py-2.5 rounded-full font-semibold text-sm transition-all shadow-[0_0_15px_rgba(100,112,78,0.15)] hover:shadow-[0_0_25px_rgba(100,112,78,0.3)]">
+                Assine o Club
+            </a>
+
+            <!-- Mobile Menu Toggle -->
+            <button id="mobile-menu-btn" class="md:hidden text-gray-300 hover:text-white transition-colors relative z-50">
+                <i class="ph ph-list text-3xl"></i>
+            </button>
+        </div>
+
+        <!-- Mobile Menu Overlay -->
+        <div id="mobile-menu" class="fixed inset-0 bg-dark/95 backdrop-blur-xl z-40 flex flex-col items-center justify-center gap-8 transition-all duration-300 opacity-0 pointer-events-none">
+            <a href="#sobre" class="mobile-link text-2xl font-syne text-white hover:text-brand transition-colors">Nossa História</a>
+            <a href="#faq" class="mobile-link text-2xl font-syne text-white hover:text-brand transition-colors">Dúvidas</a>
+            <a href="#depoimentos" class="mobile-link text-2xl font-syne text-white hover:text-brand transition-colors">Depoimentos</a>
+            <a href="#unidades" class="mobile-link text-2xl font-syne text-white hover:text-brand transition-colors">Unidades</a>
+            <a href="#barbeiros" class="mobile-link text-2xl font-syne text-white hover:text-brand transition-colors">Barbeiros</a>
+            <a href="#assinar" class="mobile-link bg-brand hover:bg-brandHover transition-colors text-white px-8 py-3 rounded-full font-bold mt-4 shadow-[0_0_15px_rgba(100,112,78,0.3)]">Assine o Club</a>
+        </div>
+    </header>
+
+    <main>
+        <!-- HERO SECTION -->
+        <section class="relative min-h-screen flex items-center justify-center pt-20 overflow-hidden">
+            <!-- Background Particles Canvas -->
+            <canvas id="particles-canvas"></canvas>
+            
+            <!-- Background Glow Spot -->
+            <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-white/5 rounded-full blur-[120px] pointer-events-none mix-blend-screen"></div>
+            
+            <div class="relative z-10 max-w-5xl mx-auto px-6 text-center">
+                <div class="inline-flex items-center gap-2 px-4 py-2 rounded-full glass border border-white/10 mb-8 reveal text-sm text-gray-300 backdrop-blur-xl">
+                    <span class="relative flex h-2 w-2">
+                      <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-brand opacity-75"></span>
+                      <span class="relative inline-flex rounded-full h-2 w-2 bg-brand"></span>
+                    </span>
+                    O "Netflix" dos cortes de cabelo
+                </div>
+                
+                <h1 class="text-5xl md:text-7xl lg:text-8xl font-syne font-bold leading-[1.1] mb-6 reveal reveal-delay-1 tracking-tight">
+                    A 1ª Barbearia por assinatura de <span class="title-shimmer">Sorocaba</span>.
+                </h1>
+                
+                <p class="text-lg md:text-xl text-gray-400 mb-10 max-w-2xl mx-auto reveal reveal-delay-2 font-light">
+                    Pague uma mensalidade fixa no cartão de crédito. Corte o cabelo e faça a barba quantas vezes quiser no mês. Simples, premium e sem limites.
+                </p>
+                
+                <div class="flex flex-col sm:flex-row gap-4 justify-center reveal reveal-delay-3">
+                    <a href="#assinar" class="magnetic-btn bg-brand text-white px-8 py-4 rounded-full font-semibold text-lg flex items-center justify-center gap-2 hover:bg-brandHover transition-all shadow-[0_0_20px_rgba(100,112,78,0.3)] hover:shadow-[0_0_40px_rgba(100,112,78,0.6)] animate-glow-pulse">
+                        Quero ser Club <i class="ph ph-arrow-right font-bold"></i>
+                    </a>
+                    <a href="#sobre" class="magnetic-btn px-8 py-4 rounded-full font-semibold text-lg flex items-center justify-center gap-2 border border-white/20 hover:bg-brand hover:text-white transition-colors text-white backdrop-blur-sm bg-white/5">
+                        Entenda o modelo
+                    </a>
+                </div>
+            </div>
+            
+            <!-- Scroll Down Indicator -->
+            <div class="absolute bottom-10 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2 text-gray-400 animate-bounce">
+                <span class="text-xs uppercase tracking-widest">Role</span>
+                <i class="ph ph-arrow-down text-xl text-brand"></i>
+            </div>
+        </section>
+
+        <!-- STATS SECTION (Counter Animation) -->
+        <section class="py-20 border-y border-white/5 bg-surface/50 relative backdrop-blur-lg">
+            <div class="max-w-7xl mx-auto px-6 lg:px-12">
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-12 text-center divide-y md:divide-y-0 md:divide-x divide-white/10">
+                    <div class="reveal pt-6 md:pt-0 group">
+                        <div class="text-5xl md:text-6xl font-syne font-bold text-brand mb-2 group-hover:scale-110 transition-transform">
+                            +<span class="counter" data-target="1000">0</span>
+                        </div>
+                        <p class="text-gray-400 font-medium">Assinantes Ativos</p>
+                    </div>
+                    <div class="reveal reveal-delay-1 pt-6 md:pt-0 group">
+                        <div class="text-5xl md:text-6xl font-syne font-bold text-brand mb-2 group-hover:scale-110 transition-transform">
+                            <span class="counter" data-target="18">0</span>
+                        </div>
+                        <p class="text-gray-400 font-medium">Barbeiros Especialistas</p>
+                    </div>
+                    <div class="reveal reveal-delay-2 pt-6 md:pt-0 group">
+                        <div class="text-5xl md:text-6xl font-syne font-bold text-brand mb-2 group-hover:scale-110 transition-transform">
+                            +<span class="counter" data-target="150">0</span>k
+                        </div>
+                        <p class="text-gray-400 font-medium">Atendimentos Realizados</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- SOBRE / NOSSA HISTÓRIA -->
+        <section id="sobre" class="py-24 lg:py-32 relative">
+            <div class="max-w-7xl mx-auto px-6 lg:px-12 grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
+                <div class="reveal">
+                    <h2 class="text-4xl md:text-5xl font-syne font-bold mb-6 text-gradient">Superando desafios, quebrando os padrões.</h2>
+                    <div class="w-16 h-1 bg-brand mb-8 rounded-full"></div>
+                    <div class="space-y-6 text-gray-400 font-light text-lg leading-relaxed">
+                        <p>
+                            Nossa história começou em um dos momentos mais incertos do mundo. Fundada em <strong class="text-white font-medium">Agosto de 2020</strong>, no auge da pandemia, a Novva nasceu da resiliência e da vontade de criar uma experiência de barbearia diferente de tudo.
+                        </p>
+                        <p>
+                            Sobrevivemos, evoluímos e escutamos nossos clientes. Percebemos que o homem moderno busca praticidade, excelência e previsibilidade financeira.
+                        </p>
+                        <p>
+                            Foi assim que, em <strong class="text-brand font-medium">Maio de 2022</strong>, revolucionamos o mercado de Sorocaba com a criação do <strong class="text-white font-medium tracking-wide">CLUB NOVVA</strong>. Transformamos o corte de cabelo em uma assinatura, oferecendo liberdade total de uso com a qualidade premium que sempre foi nossa marca registrada.
+                        </p>
+                    </div>
+                </div>
+                <div class="relative reveal reveal-delay-1 h-[500px] lg:h-[600px] rounded-3xl overflow-hidden glass border border-white/10 group bg-dark">
+                    <!-- Imagem de placeholder de alta qualidade (Unsplash) substituindo a imagem quebrada -->
+                    <img src="historia.png" alt="Interior Premium Novva Barbearia" class="absolute inset-0 w-full h-full object-cover opacity-70 transition-transform duration-700 group-hover:scale-105">
+                    <div class="absolute inset-0 bg-gradient-to-t from-dark via-dark/40 to-transparent"></div>
+                    <div class="absolute bottom-8 left-8 right-8">
+                        <div class="glass p-6 rounded-2xl border border-white/10 inline-block backdrop-blur-md bg-dark/40">
+                            <i class="ph ph-scissors text-3xl text-brand mb-2"></i>
+                            <h3 class="text-xl font-syne font-bold text-white">Evolução Constante</h3>
+                            <p class="text-sm text-gray-300 mt-1">Desde 2020 redefinindo o estilo.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- COMO FUNCIONA / FAQ -->
+        <section id="faq" class="py-24 lg:py-32 bg-surfaceLight/50 border-t border-white/5 backdrop-blur-lg">
+            <div class="max-w-4xl mx-auto px-6 lg:px-12">
+                <div class="text-center mb-16 reveal">
+                    <h2 class="text-4xl md:text-5xl font-syne font-bold mb-4 text-gradient">Como funciona o Club?</h2>
+                    <p class="text-gray-400 text-lg">Dúvidas frequentes sobre a 1ª assinatura de Sorocaba.</p>
+                </div>
+
+                <div class="space-y-4">
+                    <!-- FAQ Item 1 -->
+                    <div class="accordion-item glass rounded-2xl border border-white/5 reveal reveal-delay-1 overflow-hidden group">
+                        <div class="accordion-header flex justify-between items-center p-6 lg:p-8 cursor-pointer">
+                            <h3 class="text-lg md:text-xl font-medium text-white">O PAGAMENTO CONSOME O LIMITE DO CARTÃO?</h3>
+                            <div class="w-8 h-8 rounded-full bg-white/5 flex items-center justify-center flex-shrink-0 transition-colors group-hover:bg-brand/20">
+                                <i class="ph ph-plus text-brand accordion-icon"></i>
+                            </div>
+                        </div>
+                        <div class="accordion-content bg-dark/30">
+                            <div class="px-6 lg:px-8 pb-8 pt-2">
+                                <p class="text-gray-400 leading-relaxed">NÃO! O PAGAMENTO É RECORRENTE, E DESCONTA MENSALMENTE O VALOR DO CLUB. É TIPO NETFLIX MESMO!</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- FAQ Item 2 -->
+                    <div class="accordion-item glass rounded-2xl border border-white/5 reveal reveal-delay-2 overflow-hidden group">
+                        <div class="accordion-header flex justify-between items-center p-6 lg:p-8 cursor-pointer">
+                            <h3 class="text-lg md:text-xl font-medium text-white">EU POSSO USAR QUANDO QUISER MESMO, OU TEM LIMITE DE USO?</h3>
+                            <div class="w-8 h-8 rounded-full bg-white/5 flex items-center justify-center flex-shrink-0 transition-colors group-hover:bg-brand/20">
+                                <i class="ph ph-plus text-brand accordion-icon"></i>
+                            </div>
+                        </div>
+                        <div class="accordion-content bg-dark/30">
+                            <div class="px-6 lg:px-8 pb-8 pt-2">
+                                <p class="text-gray-400 leading-relaxed">QUANDO QUISER, INCLUSIVE ENVIAMOS MENSAGEM FREQUENTEMENTE PROS ASSINANTES, LEMBRANDO ELES DE VIREM CORTAR. QUEREMOS MUITO SUA PRESENÇA AQUI, SEMPRE.</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- FAQ Item 3 -->
+                    <div class="accordion-item glass rounded-2xl border border-white/5 reveal reveal-delay-3 overflow-hidden group">
+                        <div class="accordion-header flex justify-between items-center p-6 lg:p-8 cursor-pointer">
+                            <h3 class="text-lg md:text-xl font-medium text-white">COMO FAÇO O AGENDAMENTO?</h3>
+                            <div class="w-8 h-8 rounded-full bg-white/5 flex items-center justify-center flex-shrink-0 transition-colors group-hover:bg-brand/20">
+                                <i class="ph ph-plus text-brand accordion-icon"></i>
+                            </div>
+                        </div>
+                        <div class="accordion-content bg-dark/30">
+                            <div class="px-6 lg:px-8 pb-8 pt-2">
+                                <p class="text-gray-400 leading-relaxed">O AGENDAMENTO É FEITO NORMALMENTE, PELO WHATSAPP, PELO NOSSO APP OU POR LIGAÇÃO.</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- FAQ Item 4 -->
+                    <div class="accordion-item glass rounded-2xl border border-white/5 reveal reveal-delay-3 overflow-hidden group">
+                        <div class="accordion-header flex justify-between items-center p-6 lg:p-8 cursor-pointer">
+                            <h3 class="text-lg md:text-xl font-medium text-white">POSSO PAGAR NO DÉBITO / BOLETO / PIX ?</h3>
+                            <div class="w-8 h-8 rounded-full bg-white/5 flex items-center justify-center flex-shrink-0 transition-colors group-hover:bg-brand/20">
+                                <i class="ph ph-plus text-brand accordion-icon"></i>
+                            </div>
+                        </div>
+                        <div class="accordion-content bg-dark/30">
+                            <div class="px-6 lg:px-8 pb-8 pt-2">
+                                <p class="text-gray-400 leading-relaxed">NÃO, O PAGAMENTO REQUER O CADASTRO DE UM CARTÃO DE CRÉDITO. POIS O SISTEMA É AUTOMÁTICO.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- DEPOIMENTOS (Slider) -->
+        <section id="depoimentos" class="py-24 lg:py-32 relative overflow-hidden bg-dark">
+            <!-- Efeito de fundo sutil -->
+            <div class="absolute inset-0 bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-brand/10 to-transparent opacity-40 pointer-events-none"></div>
+
+            <div class="max-w-7xl mx-auto px-6 lg:px-12 mb-12 flex justify-between items-end reveal relative z-10">
+                <div>
+                    <h2 class="text-4xl md:text-5xl font-syne font-bold mb-4 text-gradient">O que dizem do Club</h2>
+                    <p class="text-gray-400 text-lg">A experiência contada por quem vive.</p>
+                </div>
+                <div class="hidden md:flex gap-4">
+                    <!-- Setas do slider corrigidas -->
+                    <button id="slider-prev" class="w-12 h-12 rounded-full glass border border-white/10 flex items-center justify-center text-gray-400 hover:text-brand hover:border-brand transition-all hover:scale-110 active:scale-95">
+                        <i class="ph ph-arrow-left text-xl"></i>
+                    </button>
+                    <button id="slider-next" class="w-12 h-12 rounded-full glass border border-white/10 flex items-center justify-center text-gray-400 hover:text-brand hover:border-brand transition-all hover:scale-110 active:scale-95">
+                        <i class="ph ph-arrow-right text-xl"></i>
+                    </button>
+                </div>
+            </div>
+
+            <div class="max-w-7xl mx-auto px-6 lg:px-12 relative z-10">
+                <div id="slider-container" class="flex overflow-x-auto gap-6 pb-8 snap-x snap-mandatory hide-scrollbar scroll-smooth">
+                    
+                    <!-- Card 1 -->
+                    <div class="min-w-[320px] md:min-w-[400px] snap-center glass glass-hover rounded-3xl p-8 border border-white/5 reveal">
+                        <div class="flex items-center gap-2 mb-6 text-brand">
+                            <i class="ph-fill ph-star"></i><i class="ph-fill ph-star"></i><i class="ph-fill ph-star"></i><i class="ph-fill ph-star"></i><i class="ph-fill ph-star"></i>
+                        </div>
+                        <p class="text-gray-300 text-lg leading-relaxed mb-8 font-light italic">"A melhor ideia que já tiveram em Sorocaba. Sempre ando alinhado para as reuniões de negócios, sem me preocupar em pagar toda vez. Atendimento impecável em ambas unidades."</p>
+                        <div class="flex items-center gap-4">
+                            <div>
+                                <h4 class="text-white font-medium text-lg">Victor Casagrande</h4>
+                                <span class="text-brand text-sm">Assinante há 2 anos</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Card 2 -->
+                    <div class="min-w-[320px] md:min-w-[400px] snap-center glass glass-hover rounded-3xl p-8 border border-white/5 reveal reveal-delay-1">
+                        <div class="flex items-center gap-2 mb-6 text-brand">
+                            <i class="ph-fill ph-star"></i><i class="ph-fill ph-star"></i><i class="ph-fill ph-star"></i><i class="ph-fill ph-star"></i><i class="ph-fill ph-star"></i>
+                        </div>
+                        <p class="text-gray-300 text-lg leading-relaxed mb-8 font-light italic">"Levo meus dois filhos todo mês. O ambiente é extremamente agradável, os barbeiros são profissionais e o modelo de assinatura salva o orçamento da família. Recomendo demais!"</p>
+                        <div class="flex items-center gap-4">
+                            <div>
+                                <h4 class="text-white font-medium text-lg">Paula Palácios</h4>
+                                <span class="text-brand text-sm">Plano Kids/Family</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Card 3 -->
+                    <div class="min-w-[320px] md:min-w-[400px] snap-center glass glass-hover rounded-3xl p-8 border border-white/5 reveal reveal-delay-2">
+                        <div class="flex items-center gap-2 mb-6 text-brand">
+                            <i class="ph-fill ph-star"></i><i class="ph-fill ph-star"></i><i class="ph-fill ph-star"></i><i class="ph-fill ph-star"></i><i class="ph-fill ph-star"></i>
+                        </div>
+                        <p class="text-gray-300 text-lg leading-relaxed mb-8 font-light italic">"Praticidade define. Agendo pelo WhatsApp em 2 minutos, chego na unidade Santa Rosália, tomo uma cerveja trincando e corto o cabelo. Experiência de altíssimo nível."</p>
+                        <div class="flex items-center gap-4">
+                            <div>
+                                <h4 class="text-white font-medium text-lg">Leonardo V. Santos</h4>
+                                <span class="text-brand text-sm">Assinante Premium</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Card 4 (Adicional para demonstrar o scroll) -->
+                    <div class="min-w-[320px] md:min-w-[400px] snap-center glass glass-hover rounded-3xl p-8 border border-white/5 reveal reveal-delay-3">
+                        <div class="flex items-center gap-2 mb-6 text-brand">
+                            <i class="ph-fill ph-star"></i><i class="ph-fill ph-star"></i><i class="ph-fill ph-star"></i><i class="ph-fill ph-star"></i><i class="ph-fill ph-star"></i>
+                        </div>
+                        <p class="text-gray-300 text-lg leading-relaxed mb-8 font-light italic">"Desde que virei assinante, não me preocupo mais com agendamento e pagamento. O serviço é sempre top e o ambiente é sensacional para relaxar."</p>
+                        <div class="flex items-center gap-4">
+                            <div>
+                                <h4 class="text-white font-medium text-lg">Rafael Almeida</h4>
+                                <span class="text-brand text-sm">Assinante Club</span>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </section>
+
+        <!-- UNIDADES -->
+        <section id="unidades" class="py-24 lg:py-32 bg-surfaceLight/50 border-t border-white/5 relative backdrop-blur-lg">
+            <div class="max-w-7xl mx-auto px-6 lg:px-12">
+                <div class="text-center mb-16 reveal">
+                    <h2 class="text-4xl md:text-5xl font-syne font-bold mb-4 text-gradient">Nossas Unidades</h2>
+                    <p class="text-gray-400 text-lg">Presente nos melhores pontos de Sorocaba.</p>
+                </div>
+
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                    <!-- Unidade 1 -->
+                    <div class="glass glass-hover rounded-3xl p-2 border border-white/5 reveal group transition-all">
+                        <div class="h-64 rounded-2xl bg-cover bg-center mb-6 overflow-hidden relative grayscale group-hover:grayscale-0 transition-all duration-700" style="background-image: url('Unidade Santa R.png')">
+                            <div class="absolute inset-0 bg-dark/50 group-hover:bg-transparent transition-colors duration-500"></div>
+                            <div class="absolute top-4 left-4 glass px-4 py-1.5 rounded-full text-xs font-semibold text-white uppercase tracking-wider backdrop-blur-md flex items-center gap-2">
+                                <span class="w-2 h-2 rounded-full bg-brand animate-pulse"></span> Matriz
+                            </div>
+                        </div>
+                        <div class="p-6 pt-0">
+                            <h3 class="text-2xl font-syne font-bold text-white mb-2 group-hover:text-brand transition-colors">Santa Rosália</h3>
+                            <p class="text-gray-400 mb-6 flex items-start gap-2">
+                                <i class="ph-fill ph-map-pin text-brand mt-1"></i>
+                                Av. Pereira da Silva, 803<br>Jardim Santa Rosália, Sorocaba - SP
+                            </p>
+                            <a href="#" class="magnetic-btn w-full block text-center bg-white/5 hover:bg-brand border border-white/10 hover:border-brand text-white hover:text-dark py-4 rounded-xl font-medium transition-all hover:shadow-[0_0_20px_rgba(255,255,255,0.2)]">
+                                Agendar nesta unidade
+                            </a>
+                        </div>
+                    </div>
+
+                    <!-- Unidade 2 -->
+                    <div class="glass glass-hover rounded-3xl p-2 border border-white/5 reveal reveal-delay-1 group transition-all">
+                        <div class="h-64 rounded-2xl bg-cover bg-center mb-6 overflow-hidden relative grayscale group-hover:grayscale-0 transition-all duration-700" style="background-image: url('Unidade Boa Vista.png')">
+                            <div class="absolute inset-0 bg-dark/50 group-hover:bg-transparent transition-colors duration-500"></div>
+                        </div>
+                        <div class="p-6 pt-0">
+                            <h3 class="text-2xl font-syne font-bold text-white mb-2 group-hover:text-brand transition-colors">Boa Vista</h3>
+                            <p class="text-gray-400 mb-6 flex items-start gap-2">
+                                <i class="ph-fill ph-map-pin text-brand mt-1"></i>
+                                R. Vinte e Oito de Outubro, 76<br>Alto da Boa Vista, Sorocaba - SP
+                            </p>
+                            <a href="#" class="magnetic-btn w-full block text-center bg-white/5 hover:bg-brand border border-white/10 hover:border-brand text-white hover:text-white py-4 rounded-xl font-medium transition-all hover:shadow-[0_0_20px_rgba(100,112,78,0.3)]">
+                                Agendar nesta unidade
+                            </a>
+                        </div>
+                    </div>
+
+                    <!-- Unidade 3 -->
+                    <div class="glass glass-hover rounded-3xl p-2 border border-white/5 reveal reveal-delay-2 group transition-all">
+                        <div class="h-64 rounded-2xl bg-cover bg-center mb-6 overflow-hidden relative grayscale group-hover:grayscale-0 transition-all duration-700" style="background-image: url('Campolim.png')">
+                            <div class="absolute inset-0 bg-dark/50 group-hover:bg-transparent transition-colors duration-500"></div>
+                            <div class="absolute top-4 left-4 glass px-4 py-1.5 rounded-full text-xs font-semibold text-white uppercase tracking-wider backdrop-blur-md flex items-center gap-2">
+                                <span class="w-2 h-2 rounded-full bg-yellow-500 animate-pulse"></span> Em Breve
+                            </div>
+                        </div>
+                        <div class="p-6 pt-0">
+                            <h3 class="text-2xl font-syne font-bold text-white mb-2 group-hover:text-brand transition-colors">Campolim</h3>
+                            <p class="text-gray-400 mb-6 flex items-start gap-2">
+                                <i class="ph-fill ph-map-pin text-brand mt-1"></i>
+                                Bairro Campolim<br>Sorocaba - SP
+                            </p>
+                            <button disabled class="magnetic-btn w-full block text-center bg-white/5 border border-white/10 text-gray-500 py-4 rounded-xl font-medium cursor-not-allowed opacity-50">
+                                Em Construção
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- BARBEIROS -->
+        <section id="barbeiros" class="py-24 lg:py-32 bg-surfaceLight/50 border-t border-white/5 relative backdrop-blur-lg">
+            <div class="max-w-7xl mx-auto px-6 lg:px-12">
+                <div class="text-center mb-16 reveal">
+                    <h2 class="text-4xl md:text-5xl font-syne font-bold mb-4 text-gradient">Nossos Barbeiros</h2>
+                    <p class="text-gray-400 text-lg">Profissionais especializados prontos para transformar seu visual.</p>
+                </div>
+
+                <!-- Filtro de Unidades -->
+                <div class="flex justify-center mb-12 reveal reveal-delay-1">
+                    <div class="flex flex-wrap gap-4 justify-center">
+                        <button class="filter-btn active bg-brand text-white px-6 py-3 rounded-full font-semibold text-sm transition-all hover:shadow-[0_0_20px_rgba(100,112,78,0.3)]" data-filter="all">Todos</button>
+                        <button class="filter-btn bg-white/5 text-white border border-white/10 px-6 py-3 rounded-full font-semibold text-sm transition-all hover:bg-brand hover:border-brand hover:shadow-[0_0_20px_rgba(100,112,78,0.3)]" data-filter="santa-rosalia">Santa Rosália</button>
+                        <button class="filter-btn bg-white/5 text-white border border-white/10 px-6 py-3 rounded-full font-semibold text-sm transition-all hover:bg-brand hover:border-brand hover:shadow-[0_0_20px_rgba(100,112,78,0.3)]" data-filter="boa-vista">Boa Vista</button>
+                        <button class="filter-btn bg-white/5 text-white border border-white/10 px-6 py-3 rounded-full font-semibold text-sm transition-all hover:bg-brand hover:border-brand hover:shadow-[0_0_20px_rgba(100,112,78,0.3)]" data-filter="campolim">Campolim</button>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 barbeiros-grid">
+                    <!-- Barbeiro 1 - Santa Rosália -->
+                    <div class="barbeiro-card glass glass-hover rounded-3xl p-2 border border-white/5 reveal group transition-all" data-unidade="santa-rosalia">
+                        <div class="h-64 rounded-2xl bg-cover bg-center mb-6 overflow-hidden relative" style="background-image: url('barbeiro1.jpg')">
+                            <div class="absolute inset-0 bg-gradient-to-t from-dark/80 to-transparent"></div>
+                            <div class="absolute bottom-4 left-4 right-4">
+                                <div class="glass p-4 rounded-2xl border border-white/10 inline-block backdrop-blur-md bg-dark/40">
+                                    <h3 class="text-xl font-syne font-bold text-white mb-1">João Silva</h3>
+                                    <p class="text-sm text-gray-300">Especialista em Cortes Clássicos</p>
+                                    <div class="flex items-center gap-1 mt-2">
+                                        <i class="ph-fill ph-star text-brand"></i><i class="ph-fill ph-star text-brand"></i><i class="ph-fill ph-star text-brand"></i><i class="ph-fill ph-star text-brand"></i><i class="ph-fill ph-star text-brand"></i>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="p-6 pt-0">
+                            <p class="text-gray-400 mb-6">Com mais de 10 anos de experiência, João é mestre em cortes tradicionais e modernos, sempre focando na satisfação do cliente.</p>
+                            <button class="magnetic-btn w-full block text-center bg-white/5 hover:bg-brand border border-white/10 hover:border-brand text-white hover:text-dark py-4 rounded-xl font-medium transition-all hover:shadow-[0_0_20px_rgba(255,255,255,0.2)]">
+                                Agendar com João
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Barbeiro 2 - Santa Rosália -->
+                    <div class="barbeiro-card glass glass-hover rounded-3xl p-2 border border-white/5 reveal reveal-delay-1 group transition-all" data-unidade="santa-rosalia">
+                        <div class="h-64 rounded-2xl bg-cover bg-center mb-6 overflow-hidden relative" style="background-image: url('barbeiro2.jpg')">
+                            <div class="absolute inset-0 bg-gradient-to-t from-dark/80 to-transparent"></div>
+                            <div class="absolute bottom-4 left-4 right-4">
+                                <div class="glass p-4 rounded-2xl border border-white/10 inline-block backdrop-blur-md bg-dark/40">
+                                    <h3 class="text-xl font-syne font-bold text-white mb-1">Carlos Mendes</h3>
+                                    <p class="text-sm text-gray-300">Especialista em Barbas</p>
+                                    <div class="flex items-center gap-1 mt-2">
+                                        <i class="ph-fill ph-star text-brand"></i><i class="ph-fill ph-star text-brand"></i><i class="ph-fill ph-star text-brand"></i><i class="ph-fill ph-star text-brand"></i><i class="ph-fill ph-star text-brand"></i>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="p-6 pt-0">
+                            <p class="text-gray-400 mb-6">Especialista em design de barbas, Carlos transforma qualquer barba em uma obra de arte, com técnicas modernas e produtos premium.</p>
+                            <button class="magnetic-btn w-full block text-center bg-white/5 hover:bg-brand border border-white/10 hover:border-brand text-white hover:text-dark py-4 rounded-xl font-medium transition-all hover:shadow-[0_0_20px_rgba(255,255,255,0.2)]">
+                                Agendar com Carlos
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Barbeiro 3 - Boa Vista -->
+                    <div class="barbeiro-card glass glass-hover rounded-3xl p-2 border border-white/5 reveal reveal-delay-2 group transition-all" data-unidade="boa-vista">
+                        <div class="h-64 rounded-2xl bg-cover bg-center mb-6 overflow-hidden relative" style="background-image: url('barbeiro3.jpg')">
+                            <div class="absolute inset-0 bg-gradient-to-t from-dark/80 to-transparent"></div>
+                            <div class="absolute bottom-4 left-4 right-4">
+                                <div class="glass p-4 rounded-2xl border border-white/10 inline-block backdrop-blur-md bg-dark/40">
+                                    <h3 class="text-xl font-syne font-bold text-white mb-1">Rafael Costa</h3>
+                                    <p class="text-sm text-gray-300">Especialista em Cortes Modernos</p>
+                                    <div class="flex items-center gap-1 mt-2">
+                                        <i class="ph-fill ph-star text-brand"></i><i class="ph-fill ph-star text-brand"></i><i class="ph-fill ph-star text-brand"></i><i class="ph-fill ph-star text-brand"></i><i class="ph-fill ph-star text-brand"></i>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="p-6 pt-0">
+                            <p class="text-gray-400 mb-6">Atualizado com as últimas tendências, Rafael cria looks modernos e ousados, sempre respeitando o estilo pessoal de cada cliente.</p>
+                            <button class="magnetic-btn w-full block text-center bg-white/5 hover:bg-brand border border-white/10 hover:border-brand text-white hover:text-dark py-4 rounded-xl font-medium transition-all hover:shadow-[0_0_20px_rgba(255,255,255,0.2)]">
+                                Agendar com Rafael
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Barbeiro 4 - Boa Vista -->
+                    <div class="barbeiro-card glass glass-hover rounded-3xl p-2 border border-white/5 reveal reveal-delay-3 group transition-all" data-unidade="boa-vista">
+                        <div class="h-64 rounded-2xl bg-cover bg-center mb-6 overflow-hidden relative" style="background-image: url('barbeiro4.jpg')">
+                            <div class="absolute inset-0 bg-gradient-to-t from-dark/80 to-transparent"></div>
+                            <div class="absolute bottom-4 left-4 right-4">
+                                <div class="glass p-4 rounded-2xl border border-white/10 inline-block backdrop-blur-md bg-dark/40">
+                                    <h3 class="text-xl font-syne font-bold text-white mb-1">Lucas Ferreira</h3>
+                                    <p class="text-sm text-gray-300">Especialista em Tratamentos</p>
+                                    <div class="flex items-center gap-1 mt-2">
+                                        <i class="ph-fill ph-star text-brand"></i><i class="ph-fill ph-star text-brand"></i><i class="ph-fill ph-star text-brand"></i><i class="ph-fill ph-star text-brand"></i><i class="ph-fill ph-star text-brand"></i>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="p-6 pt-0">
+                            <p class="text-gray-400 mb-6">Focado em cuidados capilares, Lucas oferece tratamentos especializados para manter seus cabelos saudáveis e brilhantes.</p>
+                            <button class="magnetic-btn w-full block text-center bg-white/5 hover:bg-brand border border-white/10 hover:border-brand text-white hover:text-dark py-4 rounded-xl font-medium transition-all hover:shadow-[0_0_20px_rgba(255,255,255,0.2)]">
+                                Agendar com Lucas
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Barbeiro 5 - Campolim -->
+                    <div class="barbeiro-card glass glass-hover rounded-3xl p-2 border border-white/5 reveal reveal-delay-1 group transition-all" data-unidade="campolim">
+                        <div class="h-64 rounded-2xl bg-cover bg-center mb-6 overflow-hidden relative" style="background-image: url('barbeiro5.jpg')">
+                            <div class="absolute inset-0 bg-gradient-to-t from-dark/80 to-transparent"></div>
+                            <div class="absolute bottom-4 left-4 right-4">
+                                <div class="glass p-4 rounded-2xl border border-white/10 inline-block backdrop-blur-md bg-dark/40">
+                                    <h3 class="text-xl font-syne font-bold text-white mb-1">Pedro Santos</h3>
+                                    <p class="text-sm text-gray-300">Especialista em Cortes Femininos</p>
+                                    <div class="flex items-center gap-1 mt-2">
+                                        <i class="ph-fill ph-star text-brand"></i><i class="ph-fill ph-star text-brand"></i><i class="ph-fill ph-star text-brand"></i><i class="ph-fill ph-star text-brand"></i><i class="ph-fill ph-star text-brand"></i>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="p-6 pt-0">
+                            <p class="text-gray-400 mb-6">Especializado em cortes femininos, Pedro combina técnica e criatividade para realçar a beleza natural de cada mulher.</p>
+                            <button class="magnetic-btn w-full block text-center bg-white/5 hover:bg-brand border border-white/10 hover:border-brand text-white hover:text-dark py-4 rounded-xl font-medium transition-all hover:shadow-[0_0_20px_rgba(255,255,255,0.2)]">
+                                Agendar com Pedro
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Barbeiro 6 - Campolim -->
+                    <div class="barbeiro-card glass glass-hover rounded-3xl p-2 border border-white/5 reveal reveal-delay-2 group transition-all" data-unidade="campolim">
+                        <div class="h-64 rounded-2xl bg-cover bg-center mb-6 overflow-hidden relative" style="background-image: url('barbeiro6.jpg')">
+                            <div class="absolute inset-0 bg-gradient-to-t from-dark/80 to-transparent"></div>
+                            <div class="absolute bottom-4 left-4 right-4">
+                                <div class="glass p-4 rounded-2xl border border-white/10 inline-block backdrop-blur-md bg-dark/40">
+                                    <h3 class="text-xl font-syne font-bold text-white mb-1">André Oliveira</h3>
+                                    <p class="text-sm text-gray-300">Especialista Geral</p>
+                                    <div class="flex items-center gap-1 mt-2">
+                                        <i class="ph-fill ph-star text-brand"></i><i class="ph-fill ph-star text-brand"></i><i class="ph-fill ph-star text-brand"></i><i class="ph-fill ph-star text-brand"></i><i class="ph-fill ph-star text-brand"></i>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="p-6 pt-0">
+                            <p class="text-gray-400 mb-6">Versátil e experiente, André atende todas as necessidades, desde cortes básicos até estilos complexos, sempre com excelência.</p>
+                            <button class="magnetic-btn w-full block text-center bg-white/5 hover:bg-brand border border-white/10 hover:border-brand text-white hover:text-dark py-4 rounded-xl font-medium transition-all hover:shadow-[0_0_20px_rgba(255,255,255,0.2)]">
+                                Agendar com André
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- APP DOWNLOAD SECTION -->
+        <section id="app" class="py-24 lg:py-32 bg-dark relative border-t border-white/5 overflow-hidden">
+            <div class="absolute inset-0 bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-brand/5 to-transparent opacity-50 pointer-events-none"></div>
+            <div class="max-w-5xl mx-auto px-6 lg:px-12 text-center reveal relative z-10">
+                <h2 class="text-4xl md:text-5xl font-syne font-bold mb-6 text-white">Baixe o nosso App</h2>
+                <p class="text-gray-400 mb-10 text-lg max-w-2xl mx-auto">Agende seus horários, acompanhe seu histórico e gerencie sua assinatura com total facilidade direto do seu celular.</p>
+                <div class="flex flex-col sm:flex-row justify-center gap-4">
+                    <a href="#" class="magnetic-btn flex items-center justify-center gap-3 bg-white/5 hover:bg-brand text-white border border-white/10 px-8 py-4 rounded-2xl transition-all hover:shadow-[0_0_20px_rgba(100,112,78,0.3)]">
+                        <i class="ph-fill ph-apple-logo text-4xl"></i>
+                        <div class="text-left">
+                            <span class="block text-xs uppercase tracking-wider text-gray-300">Baixar na</span>
+                            <span class="block text-xl font-bold leading-none mt-1">App Store</span>
+                        </div>
+                    </a>
+                    <a href="#" class="magnetic-btn flex items-center justify-center gap-3 bg-white/5 hover:bg-brand text-white border border-white/10 px-8 py-4 rounded-2xl transition-all hover:shadow-[0_0_20px_rgba(100,112,78,0.3)]">
+                        <i class="ph-fill ph-google-play-logo text-4xl"></i>
+                        <div class="text-left">
+                            <span class="block text-xs uppercase tracking-wider text-gray-300">Disponível no</span>
+                            <span class="block text-xl font-bold leading-none mt-1">Google Play</span>
+                        </div>
+                    </a>
+                </div>
+            </div>
+        </section>
+
+        <!-- CTA FINAL -->
+        <section id="assinar" class="py-32 relative overflow-hidden border-t border-white/5">
+            <div class="absolute inset-0 bg-brand/5 pointer-events-none"></div>
+            <!-- Efeito de fundo radial -->
+            <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-brand/10 rounded-full blur-[150px] pointer-events-none mix-blend-screen opacity-50"></div>
+
+            <div class="max-w-4xl mx-auto px-6 text-center relative z-10">
+                <h2 class="text-5xl md:text-7xl font-syne font-bold mb-8 text-white reveal leading-tight">Pronto para <span class="title-shimmer">evoluir</span>?</h2>
+                <p class="text-xl text-gray-400 mb-12 reveal reveal-delay-1 font-light max-w-2xl mx-auto">Junte-se a mais de 1000 homens que já não se preocupam mais em pagar por cada corte de cabelo. Assine o Club hoje.</p>
+                <a href="#" class="magnetic-btn inline-block bg-brand hover:bg-brandHover text-dark px-12 py-6 rounded-full font-bold text-lg md:text-2xl transition-transform shadow-[0_0_30px_rgba(100,112,78,0.4)] hover:shadow-[0_0_60px_rgba(100,112,78,0.7)] reveal reveal-delay-2 animate-glow-pulse">
+                    Fazer minha assinatura agora
+                </a>
+            </div>
+        </section>
+    </main>
+
+    <!-- FOOTER -->
+    <footer class="border-t border-white/10 bg-dark py-12 relative">
+        <div class="absolute inset-0 bg-[radial-gradient(circle_at_bottom,_var(--tw-gradient-stops))] from-brand/10 to-transparent opacity-30 pointer-events-none"></div>
+        <div class="max-w-7xl mx-auto px-6 lg:px-12 flex flex-col md:flex-row justify-between items-center gap-8 relative z-10">
+            <div class="text-center md:text-left">
+                <p class="text-gray-500 text-sm mb-2 font-medium">© 2026 Novva Barbearia.</p>
+                <p class="text-gray-600 text-xs">A 1ª barbearia por assinatura de Sorocaba.</p>
+            </div>
+            
+            <div class="flex gap-4">
+                <a href="#" class="w-12 h-12 rounded-full glass border border-white/10 flex items-center justify-center text-gray-400 hover:text-dark hover:bg-brand transition-all hover:scale-110 hover:shadow-[0_0_15px_rgba(255,255,255,0.3)]">
+                    <i class="ph-fill ph-instagram-logo text-xl"></i>
+                </a>
+                <a href="#" class="w-12 h-12 rounded-full glass border border-white/10 flex items-center justify-center text-gray-400 hover:text-dark hover:bg-brand transition-all hover:scale-110 hover:shadow-[0_0_15px_rgba(255,255,255,0.3)]">
+                    <i class="ph-fill ph-whatsapp-logo text-xl"></i>
+                </a>
+                <a href="#" class="w-12 h-12 rounded-full glass border border-white/10 flex items-center justify-center text-gray-400 hover:text-dark hover:bg-brand transition-all hover:scale-110 hover:shadow-[0_0_15px_rgba(255,255,255,0.3)]">
+                    <i class="ph-fill ph-facebook-logo text-xl"></i>
+                </a>
+            </div>
+        </div>
+    </footer>
+
+    <!-- INTERACTIVITY SCRIPT -->
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            
+            // --- 1. Inicialização do Canvas de Partículas (Efeito Premium) ---
+            const canvas = document.getElementById('particles-canvas');
+            const ctx = canvas.getContext('2d');
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+
+            let particlesArray;
+            const numberOfParticles = 100; // Ajuste a quantidade de partículas
+
+            class Particle {
+                constructor() {
+                    this.x = Math.random() * canvas.width;
+                    this.y = Math.random() * canvas.height;
+                    this.size = Math.random() * 2 + 0.5; // Tamanho variado
+                    this.speedX = Math.random() * 0.5 - 0.25; // Velocidade lenta e aleatória
+                    this.speedY = Math.random() * 0.5 - 0.25;
+                    
+                    // Cores temáticas Verde Oliva e Branco
+                    const colors = ['rgba(100, 112, 78, ', 'rgba(118, 133, 91, ', 'rgba(255, 255, 255, '];
+                    const randomColor = colors[Math.floor(Math.random() * colors.length)];
+                    this.color = `${randomColor}${Math.random() * 0.3 + 0.1})`;
+                }
+                update() {
+                    this.x += this.speedX;
+                    this.y += this.speedY;
+                    // Reposicionar se sair da tela
+                    if (this.x > canvas.width || this.x < 0) this.speedX = -this.speedX;
+                    if (this.y > canvas.height || this.y < 0) this.speedY = -this.speedY;
+                }
+                draw() {
+                    ctx.fillStyle = this.color;
+                    ctx.beginPath();
+                    ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+                    ctx.fill();
+                }
+            }
+
+            function initParticles() {
+                particlesArray = [];
+                for (let i = 0; i < numberOfParticles; i++) {
+                    particlesArray.push(new Particle());
+                }
+            }
+
+            function animateParticles() {
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                for (let i = 0; i < particlesArray.length; i++) {
+                    particlesArray[i].update();
+                    particlesArray[i].draw();
+                }
+                requestAnimationFrame(animateParticles);
+            }
+
+            initParticles();
+            animateParticles();
+
+            // Redimensionar o canvas com a janela
+            window.addEventListener('resize', () => {
+                canvas.width = window.innerWidth;
+                canvas.height = window.innerHeight;
+                initParticles(); // Recriar partículas para nova resolução
+            });
+
+            // --- 2. Slider de Depoimentos (Correção do Bug) ---
+            const sliderContainer = document.getElementById('slider-container');
+            const sliderPrevBtn = document.getElementById('slider-prev');
+            const sliderNextBtn = document.getElementById('slider-next');
+
+            if (sliderContainer && sliderPrevBtn && sliderNextBtn) {
+                const scrollAmount = 400; // Quantidade de pixels para rolar (ajuste conforme a largura do card)
+
+                sliderPrevBtn.addEventListener('click', () => {
+                    sliderContainer.scrollBy({ left: -scrollAmount, behavior: 'smooth' });
+                });
+
+                sliderNextBtn.addEventListener('click', () => {
+                    sliderContainer.scrollBy({ left: scrollAmount, behavior: 'smooth' });
+                });
+            }
+
+
+            // --- 3. Scroll Reveal Animation (Intersection Observer) ---
+            const revealElements = document.querySelectorAll('.reveal');
+            
+            const revealObserver = new IntersectionObserver((entries, observer) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.classList.add('active');
+                        // Opcional: observer.unobserve(entry.target) para animar apenas uma vez
+                    }
+                });
+            }, {
+                root: null,
+                threshold: 0.1,
+                rootMargin: "0px 0px -50px 0px"
+            });
+
+            revealElements.forEach(el => revealObserver.observe(el));
+
+            // --- 4. Animação de Contador (Estatísticas) ---
+            const counters = document.querySelectorAll('.counter');
+            let hasCounted = false;
+
+            const counterObserver = new IntersectionObserver((entries) => {
+                const [entry] = entries;
+                if (entry.isIntersecting && !hasCounted) {
+                    hasCounted = true;
+                    counters.forEach(counter => {
+                        const target = +counter.getAttribute('data-target');
+                        const duration = 2000; // 2 segundos
+                        const increment = target / (duration / 16); // 60fps aprox
+                        
+                        let current = 0;
+                        const updateCounter = () => {
+                            current += increment;
+                            if (current < target) {
+                                counter.innerText = Math.ceil(current);
+                                requestAnimationFrame(updateCounter);
+                            } else {
+                                counter.innerText = target;
+                            }
+                        };
+                        updateCounter();
+                    });
+                }
+            }, { threshold: 0.5 });
+
+            if(counters.length > 0 && document.querySelector('.counter')) {
+                counterObserver.observe(document.querySelector('.counter').parentElement.parentElement);
+            }
+
+            // --- 5. Efeito de Botão Magnético (Awwwards feel) - FIX ---
+            const magneticBtns = document.querySelectorAll('.magnetic-btn');
+            
+            magneticBtns.forEach(btn => {
+                btn.addEventListener('mousemove', (e) => {
+                    const position = btn.getBoundingClientRect();
+                    const x = (e.clientX - position.left - position.width / 2) * 0.3;
+                    const y = (e.clientY - position.top - position.height / 2) * 0.3;
+                    
+                    btn.style.transform = `translate(${x}px, ${y}px)`;
+                });
+
+                btn.addEventListener('mouseleave', () => {
+                    btn.style.transform = 'translate(0px, 0px)';
+                });
+            });
+
+            // --- 6. Accordion (FAQ) Logic (Corrigida: Usando is-open em vez de active) ---
+            const accordionItems = document.querySelectorAll('.accordion-item');
+
+            accordionItems.forEach(item => {
+                const header = item.querySelector('.accordion-header');
+
+                header.addEventListener('click', () => {
+                    const isOpen = item.classList.contains('is-open');
+                    
+                    // Remove a classe 'is-open' de todos os itens (fecha os outros)
+                    accordionItems.forEach(otherItem => {
+                        otherItem.classList.remove('is-open');
+                    });
+
+                    // Se o item clicado não estava aberto, adiciona a classe 'is-open' (abre ele)
+                    if (!isOpen) {
+                        item.classList.add('is-open');
+                    }
+                });
+            });
+
+            // --- 7. Navbar blur background no scroll ---
+            const navbar = document.getElementById('navbar');
+            window.addEventListener('scroll', () => {
+                if (window.scrollY > 50) {
+                    navbar.classList.add('bg-dark/80');
+                    navbar.classList.add('backdrop-blur-md');
+                    navbar.classList.remove('glass');
+                } else {
+                    navbar.classList.add('glass');
+                    navbar.classList.remove('bg-dark/80');
+                    navbar.classList.remove('backdrop-blur-md');
+                }
+            });
+
+            // --- 9. Filtro de Barbeiros por Unidade ---
+            const filterButtons = document.querySelectorAll('.filter-btn');
+            const barbeiroCards = document.querySelectorAll('.barbeiro-card');
+
+            filterButtons.forEach(button => {
+                button.addEventListener('click', () => {
+                    // Remove active class from all buttons
+                    filterButtons.forEach(btn => btn.classList.remove('active', 'bg-brand', 'text-white'));
+                    filterButtons.forEach(btn => btn.classList.add('bg-white/5', 'text-white', 'border', 'border-white/10'));
+                    
+                    // Add active class to clicked button
+                    button.classList.add('active', 'bg-brand', 'text-white');
+                    button.classList.remove('bg-white/5', 'border', 'border-white/10');
+                    
+                    const filterValue = button.getAttribute('data-filter');
+                    
+                    barbeiroCards.forEach(card => {
+                        if (filterValue === 'all' || card.getAttribute('data-unidade') === filterValue) {
+                            card.style.display = 'block';
+                            card.style.opacity = '1';
+                            card.style.transform = 'scale(1)';
+                        } else {
+                            card.style.display = 'none';
+                            card.style.opacity = '0';
+                            card.style.transform = 'scale(0.8)';
+                        }
+                    });
+                });
+            });
+
+        });
+    </script>
+</body>
+</html>
